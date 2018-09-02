@@ -1,0 +1,36 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.nakagawashinpei.dbtest.MainActivity">
+
+
+    <item
+        android:id="@+id/action_call"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_call"
+        app:showAsAction="always" />
+
+<!--
+    <item
+        android:id="@+id/action_favorite"
+        android:icon="@drawable/ic_action_favorite"
+        android:orderInCategory="101"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_favorite"/>
+
+    <item
+        android:id="@+id/action_good"
+        android:icon="@drawable/ic_action_good"
+        android:orderInCategory="102"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_good"/>
+-->
+<!--
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+-->
+</menu>

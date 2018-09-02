@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.nakagawashinpei.dbtest">
+
+    <application
+        android:name=".MySchedulerApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
+
+        <!--
+        android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar">
+        android:theme="@style/Widget.AppCompat.ActionBar">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
+        -->
+
+
+        <!--
+        アイコンを丸にしたいときはこっちを使う
+        android:roundIcon="@mipmap/ic_launcher_round"
+        -->
+
+
+        <!-- android:theme="@style/AppTheme.NoActionBar"> -->
+        <activity
+            android:name=".TopManuActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ScheduleEditActivity" />
+        <activity android:name=".Chart" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".AddGymActivity"></activity>
+    </application>
+
+</manifest>

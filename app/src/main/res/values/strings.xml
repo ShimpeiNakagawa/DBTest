@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BoulderMemory</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_call">Call</string>
+
+    <string-array name="list">
+        <item>級別の完登数</item>
+        <item>日別の総完登数</item>
+        <item>月別の完登数</item>
+        <item>ジム別のクライミング回数</item>
+    </string-array>
+
+</resources>
