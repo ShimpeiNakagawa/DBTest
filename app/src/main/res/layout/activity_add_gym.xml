@@ -86,6 +86,23 @@
             android:backgroundTint="@color/deletebutton"
             android:onClick="GymButtonTapped"
             android:text="削除実行" />
+
+        <Button
+            android:id="@+id/test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="testButton"
+            android:text="テストボタン" />
+
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:mcv_showOtherDates="all"
+            app:mcv_selectionColor="#00F"
+            />
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

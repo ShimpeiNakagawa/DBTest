@@ -5,7 +5,7 @@
     <application
         android:name=".MySchedulerApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/icon"
+        android:roundIcon="@mipmap/icon_rnd"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
@@ -20,6 +20,7 @@
         <!--
         アイコンを丸にしたいときはこっちを使う
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@mipmap/icon"
         -->
 
 

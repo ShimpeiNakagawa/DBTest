@@ -1,7 +1,9 @@
 package com.example.nakagawashinpei.dbtest;
 
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,11 +11,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -178,7 +186,6 @@ public class AddGymActivity extends AppCompatActivity {
     public void upDateSpinner(){
         results = mRealm.where(Gym.class).findAll();
         int b = results.size();
-        Log.d("nakagawa", "onCreate int : " + b);
 
         if (results != null){
             //Toast.makeText(this, b ,Toast.LENGTH_SHORT).show();
@@ -195,4 +202,50 @@ public class AddGymActivity extends AppCompatActivity {
         }
     }
 
+    public void testButton(View view){
+
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int monthOfYear = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        final DatePickerDialog dialog = new DatePickerDialog(this, R.style.MyDialog, DateSetListener, year, monthOfYear, dayOfMonth);
+        dialog.show();
+
+        /*
+        DatePickerDialog datePickerDialog;
+        //日付情報の初期設定
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int monthOfYear = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        //日付設定ダイアログの作成
+        datePickerDialog = new DatePickerDialog(this, DateSetListener, year, monthOfYear, dayOfMonth);
+        //日付設定ダイアログの表示
+        datePickerDialog.show();
+        */
+
+    }
+
+    //日付設定時のリスナ登録
+    DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener(){
+        public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+            monthOfYear++;
+            Date testdate = null;
+            String strDate;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+
+            strDate = String.valueOf(year) + "/" + String.valueOf(monthOfYear) + "/" + String.valueOf(dayOfMonth);
+            try {
+                testdate = sdf.parse(strDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            //ログ出力
+            Log.d("DatePicker","year:" +year + " monthOfYear:" + monthOfYear + " dayOfMonth:" + dayOfMonth + " Date: " + testdate);
+        }
+    };
 }

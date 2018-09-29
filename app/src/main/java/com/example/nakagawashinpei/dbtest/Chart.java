@@ -1,5 +1,6 @@
 package com.example.nakagawashinpei.dbtest;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
@@ -29,6 +31,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
@@ -37,9 +40,11 @@ import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -69,6 +74,11 @@ public class Chart extends AppCompatActivity {
     private RealmResults<Schedule> results;
     TextView mTextViewClimbCount;
     TextView mTextViewClimb;
+    TextView mTextViewClimbTime;
+    TextView mStartText;
+    TextView mEndText;
+    Date mStartDate = null;
+    Date mEndDate = null;
     private Spinner spinner;
     String name;
     private Realm GymRealm;
@@ -77,6 +87,9 @@ public class Chart extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
+
+        mStartText = findViewById(R.id.StartText);
+        mEndText = findViewById(R.id.EndText);
 
         //mPieChart = (PieChart) findViewById(R.id.pie_chart);
         mBarChart = (BarChart) findViewById(R.id.bar_chart);
@@ -131,7 +144,7 @@ public class Chart extends AppCompatActivity {
                         layout.removeAllViews();
                         // test_sub.xmlに変更する
                         getLayoutInflater().inflate(R.layout.barchart, layout);
-                        setupBarChartView();
+                        setupGymBarChartView();
                         break;
 
                     case "月別の完登数":
@@ -141,7 +154,7 @@ public class Chart extends AppCompatActivity {
                         layout.removeAllViews();
                         // test_sub.xmlに変更する
                         getLayoutInflater().inflate(R.layout.barchart, layout);
-                        setupBarChartView();
+                        setupGymBarChartView();
                         break;
                 }
             }
@@ -178,7 +191,7 @@ public class Chart extends AppCompatActivity {
         mPieChart.setData(pieData);
     }
 
-    private void setupBarChartView() {
+    private void setupGymBarChartView() {
         mBarChart = (BarChart) findViewById(R.id.bar_chart);
         RealmResults<Schedule> results1;
         mBarChart.getAxisLeft().setDrawZeroLine(true);
@@ -186,13 +199,36 @@ public class Chart extends AppCompatActivity {
 
         List<BarEntry> entries = new ArrayList<>();
 
-        //X軸
 
+        //軸の設定
+        //X軸
+        XAxis xAxis = mBarChart.getXAxis();
+        XAxis bottomAxis = mBarChart.getXAxis();
+        bottomAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        bottomAxis.setDrawLabels(true);
+        bottomAxis.setDrawGridLines(false);
+        bottomAxis.setDrawAxisLine(true);
+
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return "" + (int) value;
+            }
+        });
+
+
+        /*
+        bottomAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+                return "" + (int) value;
+            }
+        });
+        */
 
         //Y軸(左側)
         YAxis yAxisleft = mBarChart.getAxisLeft();
         yAxisleft.setAxisMinimum(0f);
-
         //Y軸(右側)
         YAxis yAxisRight = mBarChart.getAxisRight();
         yAxisRight.setAxisMinimum(0f);
@@ -203,23 +239,20 @@ public class Chart extends AppCompatActivity {
         RealmResults<Gym> Gymresults;
         Gymresults = GymRealm.where(Gym.class).findAll();
         final String[] labels = new String[Gymresults.size()];
-        //labels[0] = "";
-        //for(int i = 0; i < Gymresults.size(); i++){
-        for(int i = 0; i < 20; i++){
-            //results1 = mRealm.where(Schedule.class).equalTo("title",Gymresults.get(i).getGym()).findAll();
-            entries.add(new BarEntry(i,i));
-            //labels[i] = Gymresults.get(i).getGym();
-        }
 
-        XAxis xAxis = mBarChart.getXAxis();
-        XAxis bottomAxis = mBarChart.getXAxis();
-        bottomAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        bottomAxis.setDrawLabels(true);
-        bottomAxis.setDrawGridLines(false);
-        bottomAxis.setDrawAxisLine(true);
+        for(int i = 0; i < Gymresults.size(); i++){
+            results1 = mRealm.where(Schedule.class).equalTo("title",Gymresults.get(i).getGym()).findAll();
+            entries.add(new BarEntry(i,results1.size()));
+            Log.d("nakagawa", "GymName:"+ Gymresults.get(i).getGym() + " result1.size:" + results1.size());
+            labels[i] = Gymresults.get(i).getGym();
+        }
+        xAxis.setValueFormatter(new MyXAxisValueFormatter(labels));
+
 
         //データに名前をつける
-        BarDataSet dataSet = new BarDataSet(entries, "級別の上った数");
+        BarDataSet dataSet = new BarDataSet(entries, "ジム別のクライミング回数");
+
+
         //整数で表示
         dataSet.setValueFormatter(new IValueFormatter() {
             @Override
@@ -228,10 +261,12 @@ public class Chart extends AppCompatActivity {
             }
         });
 
+
         dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
         BarData barData = new BarData(dataSet);
         barData.setValueTextColor(Color.BLACK);
         barData.setValueTextSize(20f);
+        //barData.setBarWidth(1);
         mBarChart.animateXY(2000,2000);
         mBarChart.setDrawValueAboveBar(true);
         mBarChart.setData(barData);;
@@ -319,14 +354,6 @@ public class Chart extends AppCompatActivity {
         //X軸
         XAxis xAxis = mLineChart.getXAxis();
         xAxis.setLabelRotationAngle(5);
-
-
-        //X軸に表示するLabelのリスト(最初の""は原点の位置)
-        //final String[] labels = {"08/18", "08/19", "08/20","08/20","08/20","08/18", "08/19", "08/20","08/20","08/20"};
-        //xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-        //xAxis.setValueFormatter(new MyXAxisValueFormatter(labels));
-
-
         XAxis bottomAxis = mLineChart.getXAxis();
         xAxis.setAxisLineWidth(1f);
         bottomAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -334,18 +361,13 @@ public class Chart extends AppCompatActivity {
         bottomAxis.setDrawGridLines(true);
         bottomAxis.setDrawAxisLine(false);
 
-
-
         //Y軸(左側)
         YAxis yAxisleft = mLineChart.getAxisLeft();
         yAxisleft.setAxisMinimum(0f);
-
         //Y軸(右側)
         YAxis yAxisRight = mLineChart.getAxisRight();
         yAxisRight.setAxisMinimum(0f);
         yAxisRight.setDrawGridLines(false);
-
-
 
 
         List<Entry> entriesGrade5 = new ArrayList<>();
@@ -361,27 +383,63 @@ public class Chart extends AppCompatActivity {
         entriesGrade1.add(new Entry(0,0));
 
         final String[] label = new String[results.size()+1];
+        List<String> listLabel = new ArrayList<String>();
+        Log.d("nakagawa", "resultSize:" + results.size() + " label:" + label.length);
+        int cnt = 1;
         label[0] = "";
+        listLabel.add("");
+        //mStartDate = results.get(3).getData();
+        //mEndDate = results.get(8).getData();
         //各Gradeのデータ登録
         for(int i = 0; i < results.size(); i++){
-            sumGrade5 = sumGrade5 + results.get(i).getGrade5();
-            sumGrade4 = sumGrade4 + results.get(i).getGrade4();
-            sumGrade3 = sumGrade3 + results.get(i).getGrade3();
-            sumGrade2 = sumGrade2 + results.get(i).getGrade2();
-            sumGrade1 = sumGrade1 + results.get(i).getGrade1();
+            if(mStartDate == null && mEndDate == null){
+                sumGrade5 = sumGrade5 + results.get(i).getGrade5();
+                sumGrade4 = sumGrade4 + results.get(i).getGrade4();
+                sumGrade3 = sumGrade3 + results.get(i).getGrade3();
+                sumGrade2 = sumGrade2 + results.get(i).getGrade2();
+                sumGrade1 = sumGrade1 + results.get(i).getGrade1();
 
-            entriesGrade5.add(new Entry(i+1,sumGrade5));
-            entriesGrade4.add(new Entry(i+1,sumGrade4));
-            entriesGrade3.add(new Entry(i+1,sumGrade3));
-            entriesGrade2.add(new Entry(i+1,sumGrade2));
-            entriesGrade1.add(new Entry(i+1,sumGrade1));
+                entriesGrade5.add(new Entry(i+1,sumGrade5));
+                entriesGrade4.add(new Entry(i+1,sumGrade4));
+                entriesGrade3.add(new Entry(i+1,sumGrade3));
+                entriesGrade2.add(new Entry(i+1,sumGrade2));
+                entriesGrade1.add(new Entry(i+1,sumGrade1));
+                Log.d("nakagawa", String.valueOf(i));
+                /*ラベルの設定*/
+                Date date = results.get(i).getData();
+                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd");
+                //label[i+1] = sdf.format(date).toString();
+                listLabel.add(sdf.format(date).toString());
 
-            /*ラベルの設定*/
-            Date date = results.get(i).getData();
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd");
-            label[i+1] = sdf.format(date).toString();
+            } else if(mStartDate != null && mEndDate != null){
+                if (results.get(i).getData().after(mStartDate) && results.get(i).getData().before(mEndDate)){
+                    sumGrade5 = sumGrade5 + results.get(i).getGrade5();
+                    sumGrade4 = sumGrade4 + results.get(i).getGrade4();
+                    sumGrade3 = sumGrade3 + results.get(i).getGrade3();
+                    sumGrade2 = sumGrade2 + results.get(i).getGrade2();
+                    sumGrade1 = sumGrade1 + results.get(i).getGrade1();
+
+                    entriesGrade5.add(new Entry(cnt,sumGrade5));
+                    entriesGrade4.add(new Entry(cnt,sumGrade4));
+                    entriesGrade3.add(new Entry(cnt,sumGrade3));
+                    entriesGrade2.add(new Entry(cnt,sumGrade2));
+                    entriesGrade1.add(new Entry(cnt,sumGrade1));
+
+                    Log.d("nakagawa", "debug1");
+                    Date date = results.get(i).getData();
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd");
+                    //label[cnt] = sdf.format(date).toString();
+                    listLabel.add(sdf.format(date).toString());
+                    cnt++;
+                }
+            }
         }
-        xAxis.setValueFormatter(new MyXAxisValueFormatter(label));
+        //listLabel.add("a");
+        //listLabel.add("b");
+
+        Log.d("nakagawa", "listlabelsize:" + listLabel.size());
+        //xAxis.setValueFormatter(new MyXAxisValueFormatter(label));
+        xAxis.setValueFormatter(new MyXAxisValueFormatter(listLabel.toArray(new String[listLabel.size()])));
 
         //各Gradeのグラフの設定
         LineDataSet dataSetGrade5 = setLineDataOfGrade(entriesGrade5,Color.RED,"5級");
@@ -415,6 +473,7 @@ public class Chart extends AppCompatActivity {
     private void initSetting(){
         mTextViewClimbCount = findViewById(R.id.TotalClimbingCount);
         mTextViewClimb = findViewById(R.id.TotalCliming);
+        mTextViewClimbTime = findViewById(R.id.totalClimbingTime);
 
         int TotalClimbingCount =
                 results.sum("grade5").intValue()
@@ -422,9 +481,92 @@ public class Chart extends AppCompatActivity {
                         + results.sum("grade3").intValue()
                         + results.sum("grade2").intValue()
                         + results.sum("grade1").intValue();
-        mTextViewClimbCount.setText("総完登課題数：" + TotalClimbingCount);
-        mTextViewClimb.setText("総クライミング日数：" + results.size());
+
+        double totalClimbingTime = 0;
+        for (int i = 0; i < results.size(); i++){
+            if(!results.get(i).getDetail().isEmpty()){
+                //Log.d("nakagawa", "initSetting: " + i);
+                totalClimbingTime += Double.parseDouble(results.get(i).getDetail());
+            }
+        }
+
+        mTextViewClimbCount.setText("総完登課題数：" + TotalClimbingCount+"課題");
+        mTextViewClimb.setText("総クライミング日数：" + results.size()+"日");
+        mTextViewClimbTime.setText("総クライミング時間：" + totalClimbingTime+"時間");
     }
+
+    public void startButtonOnClicked(View view){
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int monthOfYear = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        final DatePickerDialog dialog = new DatePickerDialog(this, R.style.MyDialog, startDateSetListener, year, monthOfYear, dayOfMonth);
+        dialog.show();
+    }
+
+    public void endButtonOnClicked(View view){
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int monthOfYear = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        final DatePickerDialog dialog = new DatePickerDialog(this, R.style.MyDialog, endDateSetListener, year, monthOfYear, dayOfMonth);
+        dialog.show();
+    }
+
+    //日付設定時のリスナ登録
+    DatePickerDialog.OnDateSetListener startDateSetListener = new DatePickerDialog.OnDateSetListener(){
+        public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+            monthOfYear++;
+            Date testdate = null;
+            String strDate;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+
+            strDate = String.valueOf(year) + "/" + String.valueOf(monthOfYear) + "/" + String.valueOf(dayOfMonth);
+            try {
+                testdate = sdf.parse(strDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            mStartDate = testdate;
+            mStartText.setText(strDate);
+            if(mStartDate != null && mEndDate != null){
+                setupLineChartView(results);
+            }
+            //ログ出力
+            Log.d("DatePicker","year:" +year + " monthOfYear:" + monthOfYear + " dayOfMonth:" + dayOfMonth + " Date: " + testdate);
+
+        }
+    };
+
+    //日付設定時のリスナ登録
+    DatePickerDialog.OnDateSetListener endDateSetListener = new DatePickerDialog.OnDateSetListener(){
+        public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+            monthOfYear++;
+            Date testdate = null;
+            String strDate;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+
+            strDate = String.valueOf(year) + "/" + String.valueOf(monthOfYear) + "/" + String.valueOf(dayOfMonth);
+            try {
+                testdate = sdf.parse(strDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            mEndDate = testdate;
+            mEndText.setText(strDate);
+            if(mStartDate != null && mEndDate != null){
+                setupLineChartView(results);
+            }
+            //ログ出力
+            Log.d("DatePicker","year:" +year + " monthOfYear:" + monthOfYear + " dayOfMonth:" + dayOfMonth + " Date: " + testdate);
+        }
+    };
 
     public void toast(String string){
         Toast.makeText(this, string,Toast.LENGTH_SHORT).show();

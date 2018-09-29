@@ -7,7 +7,6 @@ public class DataBaseManager {
 
     private Realm mRealm;
 
-
     public int getgrade(){
         int grade[];
 

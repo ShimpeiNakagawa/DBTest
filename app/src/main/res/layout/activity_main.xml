@@ -9,6 +9,7 @@
     <include
         android:id="@+id/test"
         layout="@layout/content_main"
+        android:layout_height="565dp"
         app:layout_anchor="@+id/listView"
         app:layout_anchorGravity="left|top" />
 
