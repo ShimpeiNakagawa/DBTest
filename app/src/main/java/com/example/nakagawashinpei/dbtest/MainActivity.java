@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -36,9 +35,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         mRealm = Realm.getDefaultInstance();
-
         mListView = (ListView) findViewById(R.id.listView);
         RealmResults<Schedule> schedules = mRealm.where(Schedule.class).findAll();
         ScheduleAdapter adapter = new ScheduleAdapter(schedules);
@@ -53,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
-
     }
 
     @Override
@@ -68,11 +64,6 @@ public class MainActivity extends AppCompatActivity {
         mRealm.close();
     }
 
-    /*
-    public void chartmove(View view){
-        startActivity(new Intent(MainActivity.this,Chart.class));
-    }
-    */
 
     public void onMemoryButtonTapped(View view){
         startActivity(new Intent(MainActivity.this,MainActivity.class));
@@ -88,6 +79,4 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(MainActivity.this,AddGymActivity.class));
         finish();
     }
-
-
 }

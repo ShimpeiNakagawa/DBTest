@@ -5,7 +5,6 @@
 
     <string-array name="list">
         <item>級別の完登数</item>
-        <item>日別の総完登数</item>
         <item>ジム別のクライミング回数</item>
     </string-array>
 

@@ -20,7 +20,6 @@ public class TopManuActivity extends AppCompatActivity {
         Realm.setDefaultConfiguration(config);
     }
 
-
     public void onMemoryButtonTapped(View view){
         startActivity(new Intent(TopManuActivity.this,MainActivity.class));
         finish();
